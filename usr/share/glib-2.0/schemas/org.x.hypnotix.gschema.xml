@@ -16,11 +16,6 @@
       <summary></summary>
       <description></description>
     </key>
-    <key type="b" name="prefer-dark-mode">
-      <default>true</default>
-      <summary></summary>
-      <description></description>
-    </key>
     <key type="s" name="active-provider">
       <default>"Free-TV"</default>
       <summary>Provider selected by default</summary>
@@ -29,6 +24,11 @@
     <key type="as" name="providers">
       <default>['Free-TV:::url:::https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8:::::::::']</default>
       <summary>Format: name:::type:::url(or path):::username:::password:::epg</summary>
+      <description></description>
+    </key>
+    <key type="b" name="use-local-ytdlp">
+      <default>false</default>
+      <summary></summary>
       <description></description>
     </key>
   </schema>

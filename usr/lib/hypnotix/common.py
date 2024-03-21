@@ -15,9 +15,7 @@ PROVIDERS_PATH = os.path.join(GLib.get_user_cache_dir(), "hypnotix", "providers"
 
 TV_GROUP, MOVIES_GROUP, SERIES_GROUP = range(3)
 
-BADGES = {}
-BADGES['musik'] = "music"
-BADGES['zeland'] = "newzealand"
+FAVORITES_PATH = os.path.join(GLib.get_user_cache_dir(), "hypnotix", "favorites", "list")
 
 # Used as a decorator to run things in the background
 def async_function(func):
@@ -126,8 +124,12 @@ class Channel:
                         break
                 if ext == ".jpeg":
                     ext = ".jpg"
-                self.logo_path = os.path.join(PROVIDERS_PATH, "%s-%s%s" % (slugify(provider.name), slugify(self.name), ext))
-
+                if provider is None:
+                    # favorite channel, no provider
+                    provider_name = "favorites"
+                else:
+                    provider_name = provider.name
+                self.logo_path = os.path.join(PROVIDERS_PATH, "%s-%s%s" % (slugify(provider_name), slugify(self.name), ext))
 
 class Manager:
     def __init__(self, settings):
@@ -182,7 +184,7 @@ class Manager:
                         #    source = response.content.decode("UTF-8")
                         # except UnicodeDecodeError as e:
                         #    source = response.content.decode("latin1")
-                        with open(provider.path, "w") as file:
+                        with open(provider.path, "w", encoding="utf-8") as file:
                             # Grab data by block_bytes
                             for data in response.iter_content(block_bytes,decode_unicode=True):
                                 downloaded_bytes += block_bytes
@@ -208,7 +210,7 @@ class Manager:
     def check_playlist(self, provider):
         legit = False
         if os.path.exists(provider.path):
-            with open(provider.path, "r") as file:
+            with open(provider.path, "r", encoding="utf-8", errors="ignore") as file:
                 content = file.read()
                 if "#EXTM3U" in content and "#EXTINF" in content:
                     legit = True
@@ -218,7 +220,7 @@ class Manager:
         return legit
 
     def load_channels(self, provider):
-        with open(provider.path, "r") as file:
+        with open(provider.path, "r", encoding="utf-8", errors="ignore") as file:
             channel = None
             group = None
             groups = {}
@@ -288,3 +290,15 @@ class Manager:
                             provider.movies.append(channel)
                     else:
                         provider.channels.append(channel)
+
+    def load_favorites(self):
+        favorites = []
+        with open(FAVORITES_PATH, 'r', encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                favorites.append(line.strip())
+        return favorites
+
+    def save_favorites(self, favorites):
+        with open(FAVORITES_PATH, "w", encoding="utf-8") as f:
+            for fav in favorites:
+                f.write(f"{fav}\n")
